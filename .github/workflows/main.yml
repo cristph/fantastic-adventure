@@ -1,0 +1,43 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4.2.2
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4.7.0
+      with:
+        distribution: 'temurin' # See 'Supported distributions' for available options
+        java-version: '21'
+
+    - name: Build with Maven
+      run: mvn clean install -DskipTests=true
+      
+    - name: Deploy to Server
+      uses: easingthemes/ssh-deploy@main
+      with:
+        SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        ARGS: "-rlgoDzvc -i"
+        SOURCE: "target/fantastic-adventure*.jar"
+        REMOTE_HOST: ${{ secrets.SERVER_HOST }}
+        REMOTE_USER: ${{ secrets.SERVER_USER }}
+        TARGET: ${{ secrets.SERVER_TARGET_DIR }}
+        SCRIPT_BEFORE: |
+            echo "Preparing..."
+            cd /home/admin/application
+            ls -al
+        SCRIPT_AFTER: |
+            echo "Deploying..."
+            cd /home/admin/application
+            # 强制 SSH 后台化并忽略输入
+            nohup ./deploy.sh </dev/null >deploy.log 2>&1 &
+            exit 0  # 确保 SSH 立即退出
