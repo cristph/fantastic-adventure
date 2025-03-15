@@ -19,8 +19,13 @@ jobs:
         distribution: 'temurin' # See 'Supported distributions' for available options
         java-version: '21'
 
+    - name: Replace Secrets
+      run: |
+        ls -al
+        sed -i "s/SSL_PASSWORD/${{ secrets.SSL_PASSWORD }}/g" src/main/resources/application.properties
+        
     - name: Build with Maven
-      run: mvn clean install -DskipTests=true
+      run: mvn clean install -DskipTests=true -Dmaven.repo.local=./.m2/repository
       
     - name: Deploy to Server
       uses: easingthemes/ssh-deploy@main
@@ -35,9 +40,10 @@ jobs:
             echo "Preparing..."
             cd /home/admin/application
             ls -al
+            ./stop.sh </dev/null >deploy.log 2>&1 &
         SCRIPT_AFTER: |
             echo "Deploying..."
             cd /home/admin/application
             # 强制 SSH 后台化并忽略输入
-            nohup ./deploy.sh </dev/null >deploy.log 2>&1 &
+            nohup ./deploy.sh </dev/null >>deploy.log 2>&1 &
             exit 0  # 确保 SSH 立即退出
