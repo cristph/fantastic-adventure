@@ -19,6 +19,11 @@ jobs:
         distribution: 'temurin' # See 'Supported distributions' for available options
         java-version: '21'
 
+    - name: Replace Secrets
+      run: |
+        ls -al
+        sed -i "s/SSL_PASSWORD/${{ secrets.SSL_PASSWORD }}/g" src/main/resources/application.properties
+        
     - name: Build with Maven
       run: mvn clean install -DskipTests=true -Dmaven.repo.local=./.m2/repository
       
