@@ -35,9 +35,10 @@ jobs:
             echo "Preparing..."
             cd /home/admin/application
             ls -al
+            ./stop.sh </dev/null >deploy.log 2>&1 &
         SCRIPT_AFTER: |
             echo "Deploying..."
             cd /home/admin/application
             # 强制 SSH 后台化并忽略输入
-            nohup ./deploy.sh </dev/null >deploy.log 2>&1 &
+            nohup ./deploy.sh </dev/null >>deploy.log 2>&1 &
             exit 0  # 确保 SSH 立即退出
