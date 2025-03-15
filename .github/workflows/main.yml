@@ -20,7 +20,7 @@ jobs:
         java-version: '21'
 
     - name: Build with Maven
-      run: mvn clean install -DskipTests=true
+      run: mvn clean install -DskipTests=true -Dmaven.repo.local=./.m2/repository
       
     - name: Deploy to Server
       uses: easingthemes/ssh-deploy@main
